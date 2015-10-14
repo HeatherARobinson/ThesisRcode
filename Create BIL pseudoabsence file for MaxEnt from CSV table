@@ -1,0 +1,27 @@
+setwd("C:/Users/mqbpjhr4/Documents/Analysis")	#Set working directory
+library(raster)
+library(rgdal)
+library(SDMTools)
+library(spatial.tools)				
+#Load necessary packages (Install firest if necessary)
+
+
+ts = read.table("ScerBias1.csv",header=T,sep=",") 	#Read in CSV with columns including LONGITUDE and LATITUDE in WSG84 format
+e <- extent(c(-180,180,-60,90))				#Define extent to match environmental rasters
+rast <- raster(e,ncol = 180, nrow = 180)		#Create a new raster with the dimensions of the environmental files
+x <- rasterize(ts[, 1:2], rast, ts[,3], fun=mean)	#Add data to raster. Where more than one value per pixel these are averaged. If you have more than 3 columns alter this in the second set of square brackets
+x[is.na(x)] <- 1 					#Fill the non sampled pixels with 1s (None of the raster values can be zero)
+plot(x)							#Check the coloured pixels are in roughly the right place
+bioclim<-raster('bio5.bil')				#Load the environmental bil file as a raster to create a template for trimming the new raster
+bioclim							#Check attributes
+
+r2 = raster(x) 
+res(r2) = min(res(x)) 
+r2 <- resample(x, r2, method='bilinear') 		#This will reshape the pixels from oblong to square
+projection(r2)<-"+proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs" 	#Match the projection of the environmental raster
+r3<-spatial_sync_raster(r2, bioclim, method = "ngb",
+    size_only = FALSE, raster_size, verbose = TRUE)	#Spatially sync the new raster to the environmental raster
+
+writeRaster(r3, "~/scerbiasfiles.bil", format = "BIL",overwrite=TRUE)	#Write biasfile in BIL so the format matches the env. rasters
+
+#Open in word/notepad and manually copy hdr values from one of the environmental hdr files into the hdr file for the new bil file. Make sure NBITS matcj as do the corner values.
