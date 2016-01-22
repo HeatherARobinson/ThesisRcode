@@ -1,0 +1,69 @@
+#GLM1: Assessing the significance of factors before modelling (sample weight ('weight'), sampling month ('month'), and tree identity ('hostName'))
+#The following includes subsetting commands which are functional in R 3.0.1. Different syntax may be required for later versions of R.
+
+setwd("C:/Users/mqbpjhr4/Dropbox/Analysis")
+#Set path
+#Load packages (install lubridate prior to running)
+library(lubridate)
+
+#Load data table containing binary S. paradoxus presence/absence data 
+#(download available as Supplementary file 3, https://github.com/bensassonlab/yeastecology)
+data<-read.table("presabsdata.txt", header=TRUE)
+names(data)
+attach(data)
+
+#Subset the data to only consider trees visited multiple times (so that an effect of season can be assessed)
+visits<-table(fieldDate,hostName)>0
+colSums(visits)
+as.vector(colSums(visits))	
+hostName2<-hostName
+levels(hostName2)[as.vector(colSums(visits)>1)==F]<-"NA"	#Replace '1' with NA, excluding single values
+
+# Omit soil samples from the oak analysis
+mdatedata<-data[hostName2!="NA"&substrate=="bark",]		
+attach(mdatedata)		
+
+# Check for factor values giving significantly different results
+table(Spar,site,month)		
+#Test these unusual factor levels separately
+season2<-as.factor(month)				#June appears anomalous, so is considered separately here, with all other months grouped together.
+levels(season2)
+levels(season2)[1:2]<-"NotJune"
+levels(season2)[3:4]<-"NotJune"
+
+model2<-glm(Spar~hostName*season2*weight,binomial)	#Check that the model converges
+anova(model2,test="Chi")				
+model2<-glm(Spar~hostName*month*weight,binomial)	#Check that the subgrouping of non June samples is valid
+anova(model2,model2b,test="Chi")	
+summary(model2)							
+
+#Remove non-significant interactions and factors sequentially, beginning with the most complex interactions:
+
+model3<-update(model2,~.-hostName:season2:weight)	
+anova(model2,model3,test="Chi")				
+anova(model3,test="Chi")
+
+model4<-update(model3,~.-season2:weight)		
+anova(model3,model4,test="Chi")
+anova(model4,test="Chi")
+
+model5<-update(model4,~.-hostName:season2)		 
+anova(model4,model5,test="Chi")
+anova(model5,test="Chi")				
+
+model6<-update(model5,~.-season2)
+anova(model5,model6,test="Chi")
+anova(model5,test="Chi")				#Cannot drop season from the model
+
+#Tree and weight interact, therefore weight cannot be dropped
+#Whilst weight and season are retained in the model, but neither are significant
+#Tree identity is highly significant
+
+#Compare the simplified model to the full model
+full<-glm(Spar~hostName*season2*weight,binomial)
+anova(full,model5,test="Chi")				
+
+#This analysis is repeated for ITS amplified yeasts and other unidentified yeasts in Robinson et al. 2016.
+
+#GLM2:
+
