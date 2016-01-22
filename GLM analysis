@@ -65,5 +65,93 @@ anova(full,model5,test="Chi")
 
 #This analysis is repeated for ITS amplified yeasts and other unidentified yeasts in Robinson et al. 2016.
 
+data<-read.table("byhostTmax.txt",header=TRUE)
+attach(data)
+head(data)
+sum(sampleCount)	
+# 781 samples: Total minus 10˚C incubated samples and soil samples 
+
+oakdata<-data[hostType=="oak",]	#Select for oak samples only
+attach(oakdata)
+head(oakdata)
+length(oakdata$hostName)	#126 of 166 plants
+
+
+# Multivariate analysis (GLM2) of samples summarised by tree as proportion data
+
+# Saturated model:
+modela<-glm(cbind(SparCount,sampleCount)~hostName,family=binomial)
+summary(modela)		
+#Does not converge	
+
+# Maximal model: (excludes 3-way interaction to avoid #overparameterisation. Includes main effects and all 2-way interactions 
+# site elevation is excluded as we do not expect elevation to have #different effects at different sites
+
+modelb<-glm(cbind(SparCount,sampleCount)~site+circum+elevation+circum:elevation+site:circum,family=binomial) 
+
+drop1(modelb,test="Chi")
+#Model is overparamaterised. Elevation is dropped here as there are no considerable elevation differences within sites that might enable the extraction of elevation effects.
+
+modelb2<-update(modelb,~. -circum:elevation) 
+drop1(modelb2,test="Chi")
+modelb3<-update(modelb2,~. -elevation)
+anova(modelb2,modelb3,test="Chi")
+anova(modelb,modelb3,test="Chi")
+drop1(modelb3,test="Chi")	
+
+#Sequentially drop non significant interactions as proposed by drop1
+
+modelb4<-update(modelb3,~. -site:circum) 
+anova(modelb3,modelb4,test="Chi")	# no significant effect of site:circum
+
+drop1(modelb4,test="Chi")
+modelb5<-update(modelb4,~. -circum) 
+subsetb5<-update(modelb5,subset=!is.na(circum))
+anova(modelb4,subsetb5,test="Chi")	
+# significant effect of trunk circumference (P= 3.127e-05)
+
+summary(modelb4)		
+# simplest model= cbind(SparCount,sampleCount) ~ site + circum)
+
+subseta<-update(modela,subset=!is.na(circum))
+anova(subseta,modelb4,test="Chi")	
+# Model b4 (simplified model GLM2) explains variation as well as the saturated model (d.f.=90, P=0.933)
+
+# GLM3 model constructed to explore site parameter:
+#Site is replaced in the GLM3 by the mean maximum daily temperature for #the warmest month per annum (BIO5, Worldclim data series, Hijmans et al. #2005), and a simplification of oaks by their location in northern and #southern Europe (most species being confined to single sites and not #spanning the two regions).
+
+attach(oakdata)
+oaktype<-species			
+
+#Due to hybridisation being likely in some of the trees studied and lack #of overlap in the majority of species between the UK and southern #Europe, UK and southern European oaks were grouped to simplify GLM3.
+
+levels(oaktype)[2]<-"south"	# Group southern European oaks
+levels(oaktype)[5]<-"south"
+levels(oaktype)[7]<-"south"
+levels(oaktype)[4:6]<-"north"	# Group northern European oaks
+levels(oaktype)[3]<-"south"
+table(site,oaktype)
+
+# Full model
+modelc<-glm(cbind(SparCount,sampleCount)~circum*maxtemp*oaktype, family=binomial)
+summary(modelc)
+anova(modelb4,modelc,test="Chi")	
+# Not a significantly poorer fit than model b4 (GLM2) which uses the simplified parameter 'site'. 
+
+summary(modelc)
+#Sequentially remove non-significant interactions in order of their complexity.
+
+
+modelc2<-update(modelc,~. -circum:maxtemp:oaktype)		
+anova(modelc,modelc2,test="Chi")	
+summary(modelc2)
+modelc3<-update(modelc2,~. -circum:maxtemp)		
+anova(modelc2,modelc3,test="Chi")
+summary(modelc3)				
+# No further parameters should be dropped.
+drop1(modelc3,test="Chi")
+
+
+
 #GLM2:
 
