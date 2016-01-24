@@ -165,5 +165,5 @@ summary(modelc3)
 drop1(modelc3,test="Chi")
 
 
-
+anova(modelb4,modelc,test="Chi")
 
