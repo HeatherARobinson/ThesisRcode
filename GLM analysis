@@ -1,7 +1,7 @@
 #GLM1: Assessing the significance of factors before modelling (sample weight ('weight'), sampling month ('month'), and tree identity ('hostName'))
 #The following includes subsetting commands which are functional in R 3.0.1. Different syntax may be required for later versions of R.
 
-setwd("C:/Users/mqbpjhr4/Dropbox/Analysis")
+setwd("C:/filepath...")
 #Set path
 #Load packages (install lubridate prior to running)
 library(lubridate)
