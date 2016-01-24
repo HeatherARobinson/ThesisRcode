@@ -1,7 +1,7 @@
 #GLM1: Assessing the significance of factors before modelling (sample weight ('weight'), sampling month ('month'), and tree identity ('hostName'))
 #The following includes subsetting commands which are functional in R 3.0.1. Different syntax may be required for later versions of R.
 
-setwd("C:/filepath...")
+setwd("C:path...")
 #Set path
 #Load packages (install lubridate prior to running)
 library(lubridate)
@@ -12,21 +12,26 @@ data<-read.table("presabsdata.txt", header=TRUE)
 names(data)
 attach(data)
 
+
 #Subset the data to only consider trees visited multiple times (so that an effect of season can be assessed)
 visits<-table(fieldDate,hostName)>0
 colSums(visits)
 as.vector(colSums(visits))	
 hostName2<-hostName
-levels(hostName2)[as.vector(colSums(visits)>1)==F]<-"NA"	#Replace '1' with NA, excluding single values
+levels(hostName2)[as.vector(colSums(visits)>1)==F]<-"NA"	
+#Replace '1' with NA, excluding single values
 
 # Omit soil samples from the oak analysis
 mdatedata<-data[hostName2!="NA"&substrate=="bark",]		
 attach(mdatedata)		
+detach(data)
 
+month<-month(mdatedata$fieldDate)
 # Check for factor values giving significantly different results
 table(Spar,site,month)		
 #Test these unusual factor levels separately
-season2<-as.factor(month)				#June appears anomalous, so is considered separately here, with all other months grouped together.
+season2<-as.factor(month)				
+#June appears anomalous, so is considered separately here, with all other months grouped together.
 levels(season2)
 levels(season2)[1:2]<-"NotJune"
 levels(season2)[3:4]<-"NotJune"
@@ -53,36 +58,44 @@ anova(model5,test="Chi")
 
 model6<-update(model5,~.-season2)
 anova(model5,model6,test="Chi")
-anova(model5,test="Chi")				#Cannot drop season from the model
+anova(model5,test="Chi")				
 
 #Tree and weight interact, therefore weight cannot be dropped
-#Whilst weight and season are retained in the model, but neither are significant
+#Whilst weight and season are retained in the model, neither is significant
 #Tree identity is highly significant
 
 #Compare the simplified model to the full model
 full<-glm(Spar~hostName*season2*weight,binomial)
 anova(full,model5,test="Chi")				
 
-#This analysis is repeated for ITS amplified yeasts and other unidentified yeasts in Robinson et al. 2016.
+# A repetition of this analysis ifor ITS amplified yeasts and other unidentified yeasts is described in Robinson et al. 2016.
+
+
+
+
+
+# Multivariate analysis (GLM2) of samples summarised by tree as proportion data
 
 data<-read.table("byhostTmax.txt",header=TRUE)
 attach(data)
 head(data)
 sum(sampleCount)	
-# 781 samples: Total minus 10˚C incubated samples and soil samples 
+# 781 samples: Total minus 10 degrees Celsius incubated samples and soil samples 
 
 oakdata<-data[hostType=="oak",]	#Select for oak samples only
 attach(oakdata)
 head(oakdata)
 length(oakdata$hostName)	#126 of 166 plants
 
-
-# Multivariate analysis (GLM2) of samples summarised by tree as proportion data
-
 # Saturated model:
 modela<-glm(cbind(SparCount,sampleCount)~hostName,family=binomial)
 summary(modela)		
-#Does not converge	
+
+# Maximal model: (excludes 3-way interaction to avoid #overparameterisation. Includes main effects and all 2-way interactions 
+# site elevation is excluded as we do not expect elevation to have #different effects at different sites
+
+modelb<-glm(cbind(SparCount,sampleCount)~site+circum+elevation+circum:elevation+site:circum,family=binomial) 
+
 
 # Maximal model: (excludes 3-way interaction to avoid #overparameterisation. Includes main effects and all 2-way interactions 
 # site elevation is excluded as we do not expect elevation to have #different effects at different sites
@@ -153,5 +166,4 @@ drop1(modelc3,test="Chi")
 
 
 
-#GLM2:
 
