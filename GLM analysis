@@ -12,7 +12,6 @@ data<-read.table("presabsdata.txt", header=TRUE)
 names(data)
 attach(data)
 
-
 #Subset the data to only consider trees visited multiple times (so that an effect of season can be assessed)
 visits<-table(fieldDate,hostName)>0
 colSums(visits)
@@ -20,6 +19,16 @@ as.vector(colSums(visits))
 hostName2<-hostName
 levels(hostName2)[as.vector(colSums(visits)>1)==F]<-"NA"	
 #Replace '1' with NA, excluding single values
+
+#Test for a significant difference between results from oak bark and soil samples
+oakdata<-data[hostType=="oak",]		
+attach(oakdata)
+model1<-glm(Spar~hostName*substrate,binomial)
+drop1(model1,test="Chi")
+model2<-update(model1,~. -hostName:substrate)
+drop1(model2,test="Chi")	# no obvious difference in bark vs soil
+summary(model2)
+detach(oakdata)
 
 # Omit soil samples from the oak analysis
 mdatedata<-data[hostName2!="NA"&substrate=="bark",]		
@@ -66,7 +75,7 @@ anova(model5,test="Chi")
 
 #Compare the simplified model to the full model
 full<-glm(Spar~hostName*season2*weight,binomial)
-anova(full,model5,test="Chi")				
+anova(full,model5,test="Chi")
 
 # A repetition of this analysis ifor ITS amplified yeasts and other unidentified yeasts is described in Robinson et al. 2016.
 
