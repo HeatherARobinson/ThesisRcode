@@ -26,7 +26,7 @@ attach(oakdata)
 model1<-glm(Spar~hostName*substrate,binomial)
 drop1(model1,test="Chi")
 model2<-update(model1,~. -hostName:substrate)
-drop1(model2,test="Chi")	# no obvious difference in bark vs soil
+anova(model1, model2,test="Chi")	
 summary(model2)
 detach(oakdata)
 
