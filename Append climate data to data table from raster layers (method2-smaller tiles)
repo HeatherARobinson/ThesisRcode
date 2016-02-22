@@ -1,0 +1,48 @@
+sampledata<-read.table("byhostdata.txt", header=TRUE)
+
+#Use bioclim files downloaded from www.worldclim.org/bioclim and put in working directory (or add link to access them online)
+
+memory.limit(100000)	#Assign more RAM to R
+library(raster)		#Load necessary packages
+library(rgdal)
+
+r1a <- raster('bio5_16.bil')	#Construct raster by joining tiles needed to cover study area 
+r1b<- raster('bio5_15.bil')
+bio5 <- merge(r1a, r1b)		#Repeat for each layer 
+r4a <- raster('bio13_15.bil')
+r4b <- raster('bio13_16.bil')
+bio13 <- merge(r4a, r4b)
+rasbioclim<-stack(bio5,bio13)	#Stack raster layers 
+rasbioclim			#Check number of layers looks correct
+
+#Produce test output file 'climdata(30).txt' 
+l=sampledata$latitude
+a=sampledata$longitude
+climdata<-file(paste("climdata(30).txt"), open="w")
+cat("hostName","latitude","longitude","maxtemp","precwetmonth","\n", file="climdata(30).txt",append=TRUE)
+for (n in 1:166){
+c <- c(a[n],a[n]+0.01,l[n],l[n]+0.01)
+e<-extent(c)
+zoom<-crop(rasbioclim,e)
+cat((paste(sampledata$hostName[n])),xmin(zoom),ymin(zoom),minValue(zoom$layer.1), minValue(zoom$layer.2), "\n", file="climdata(30).txt", sep="\t", fill=FALSE, labels=NULL, append=TRUE)
+}
+
+#Check printed file
+climdata<-read.table("climdata(30).txt", header=TRUE)
+head(climdata)
+tail(climdata)
+
+#Append to the master table
+#Print a new joined table to the working directory, 'byhostbioclim.txt'
+
+joined<-merge(sampledata,climdata, by="hostName")
+attach(joined)
+
+byhostbioclim<-file(paste("byhostbioclim.txt"), open="w")
+cat("hostName", "ScerCount","SparCount","otherAmplifiedITScount","otherGrowthCount","sampleCount","
+site","species","hostType","latitude.x","longitude.x","latitude.y","longitude.y","elevation","circum","pH","maxtemp","precwetmonth","\n", sep="\t",file="byhostbioclim.txt",append=TRUE)
+for (n in 1:166){
+cat((paste(joined$hostName[n])),(paste(joined$ScerCount[n])),(paste(joined$SparCount[n])), (paste(joined$otherAmplifiedITScount[n])),(paste(joined$otherGrowthCount[n])),(paste(joined$sampleCount[n])),
+(paste(joined$site[n])),(paste(joined$species[n])), (paste(joined$hostType[n])),(paste(joined$latitude.x[n])),(paste(joined$longitude.x[n])),(paste(joined$latitude.y[n])),(paste(joined$longitude.y[n])),
+(paste(joined$elevation[n])),(paste(joined$circum[n])),(paste(joined$pH[n])),(paste(joined$maxtemp[n])), (paste(joined$precwetmonth[n])),"\n", file="byhostbioclim.txt", sep="\t", fill=FALSE, labels=NULL, append=TRUE)
+}   
