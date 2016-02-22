@@ -1,0 +1,73 @@
+attach(oakdata)
+plot(circum, SparCount/sampleCount,pch=19,type="n",xlab="Trunk Circumference (m)",ylab=expression(paste(italic("S. paradoxus"), "Isolation Rate (Isolates per sample/Tree)")))
+
+modelf2b<-glm(SparCount~circum+site2+circum:site2+offset(log(sampleCount)),poisson) #Converges
+oakrob<-oakdata[oaktype2=="roburlike",]
+attach(oakrob)
+c<-seq(min(circum,na.rm=T),max(circum,na.rm=T),(max(circum,na.rm=T))/(1000-1))
+s<-rep("UK",length(c))
+n<-rep(1,length(c))
+
+yp<-predict(modelf2b,list(circum=c,site2=s,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+summary(exp(subyp))
+lines(subc,exp(subyp),col="black",lwd=2)#UK(robur)	#Grows up to 2m circumference
+
+
+oakpub<-oakdata[oaktype2=="pubescenslike",]
+detach(oakrob)
+attach(oakpub)
+c<-seq(min(circum,na.rm=T),max(circum,na.rm=T),(max(circum,na.rm=T))/(1000-1))
+
+s<-rep("PYR",length(c))
+n<-rep(1,length(c))
+yp<-predict(modelf2b,list(circum=c,site2=s,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+lines(subc,exp(subyp),col="red")	#Pedunculate oak grows up to 4m circumference
+
+s<-rep("MB",length(c))
+yp<-predict(modelf2b,list(circum=c,site2=s,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+lines(subc,exp(subyp),col="blue")
+
+s<-rep("TAX",length(c))
+yp<-predict(modelf2b,list(circum=c,site2=s,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+lines(subc,exp(subyp),col="forestgreen")
+
+s<-rep("PAR",length(c))
+yp<-predict(modelf2b,list(circum=c,site2=s,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+lines(subc,exp(subyp),col="orange")
+
+attach(oakdata)
+
+site2<-oakdata$site
+levels(site2)					
+levels(site2)[1]<-"UK"
+levels(site2)[3:5]<-"UK"
+levels(site2)[4]<-"UK"
+levels(site2)[5]<-"UK"
+levels(site2)[6]<-"UK"
+levels(site2)[9:10]<-"UK"
+levels(site2)
+table(site2,species)
+
+
+# draw on points coloured by circum predicted quantiles, and sized by circum
+points(circum[site2=="UK"],SparCount[site2=="UK"]/sampleCount[site2=="UK"],pch=19,col="black",cex=1.2)
+points(circum[site2=="MB"],SparCount[site2=="MB"]/sampleCount[site2=="MB"],pch=19,col="blue",cex=1.2)
+points(circum[site2=="PYR"],SparCount[site2=="PYR"]/sampleCount[site2=="PYR"],pch=19,col="red",cex=1.2)
+points(circum[site2=="TAX"],SparCount[site2=="TAX"]/sampleCount[site2=="TAX"],pch=19,col="forestgreen",cex=1.2)
+points(circum[site2=="PAR"],SparCount[site2=="PAR"]/sampleCount[site2=="PAR"],pch=19,col="orange",cex=1.2)
+par(xpd=TRUE)
+
+legend(5,1.02,title="Site Code",bg="white",bty='n',c("U.K.","PYR","MB","TAX","PAR"),lty=1,lwd=2, col=c("black","red","blue","green","orange"),xjust=0,cex=0.9)
+par(xpd=FALSE)
+
+
