@@ -1,0 +1,83 @@
+setwd("C:/Users/mqbpjhr4/Documents/Analysis")
+tab<-read.table("manystudies.txt", header=TRUE)
+attach(tab)
+#Load climate data
+
+library(raster)
+library(rgdal)
+outline<-as.raster('FullWorld_30.dbf')
+bioclim<-stack(raster('bio5.bil'))
+bioclim
+
+#Load necessary packages
+
+library(maps)
+library(mapdata)
+library(mapproj)
+library(scales)
+library(fields)
+library(plotrix)
+
+#Set plot parameters
+
+addalpha <- function(colors, alpha=1.0) {
+  r <- col2rgb(colors, alpha=T)
+  # Apply alpha
+  r[4,] <- alpha*255
+  r <- r/255.0
+  return(rgb(r[1,], r[2,], r[3,], r[4,]))
+}
+
+par(mar=c(0,0,0,1))
+breakpoints <- c(-8,25,29,35,38,52)
+col2<-addalpha("darkorange4", 0.2)
+col3<-addalpha("darkorange4", 0.4)
+col4<-addalpha("darkorange4", 0.6)
+col5<-addalpha("darkorange4", 0.8)
+colors<-c("white",col2,col3,col4,col5)
+
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xlim=c(-12,28),ylim=c(33,65))
+map(xlim=c(-12,28),ylim=c(33,65), add=T)
+
+par(xpd=TRUE)
+legend(30,65,c(""),col="white",title=expression(paste("Temp. (",degree,"C)")),bty="n",cex=0.8)
+
+#Add points for each site
+latitude<-as.numeric(as.character(latitude))
+longitude<-as.numeric(as.character(longitude))
+
+par(pch=21,col="black")						
+pc<-"darkgrey"
+for (s in unique(site[Scer=="1"])) {
+	points(mean(longitude[site==s]),mean(latitude[site==s]),bg=pc, cex=1.5)
+}
+
+
+par(pch=21,col="black")						# Clinical isolate genotypes
+pc<-"bisque"
+for (s in unique(site[GENOTYPE=="human4"])) {
+	points(mean(longitude[site==s]),mean(latitude[site==s]),bg=pc,cex=1.5)
+}
+
+par(pch=21,col="black")						# Wine genotypes
+pc<-"red"
+for (s in unique(site[GENOTYPE=="wine"])) {
+	points(mean(longitude[site==s]),mean(latitude[site==s]),bg=pc,cex=1.5)
+}
+
+par(pch=21,col="black")						# Mosaic genotypes
+pc<-"yellow"
+for (s in unique(site[GENOTYPE=="mosaic"])) {
+	points(mean(longitude[site==s]),mean(latitude[site==s]),bg=pc,cex=1.5)
+}
+
+par(pch=21,col="black")						# European oak genotypes
+pc<-"green"
+for (s in unique(site[GENOTYPE=="EuropeanOak"])) {
+	points(mean(longitude[site==s]),mean(latitude[site==s]),bg=pc,cex=1.5)
+}
+
+
+legend(-10,72,c("Mosaic","European Oak", "Wine", "Human associated","Not assigned"),pch=16,pt.cex=1.2,col="black",bty="n",cex=0.8)
+legend(-10,72,c("Mosaic","European Oak", "Wine", "Human associated","Not assigned"),pch=16,pt.cex=1,col=c("yellow","green","red","bisque","darkgrey"),bty="n",cex=0.8)
+
