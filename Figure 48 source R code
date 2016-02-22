@@ -1,0 +1,79 @@
+setwd("C:/Users/mqbpjhr4/Documents/Analysis")
+tab<-read.table("manystudies.txt", header=TRUE)
+attach(tab)
+
+#Load necessary packages
+
+library(maps)
+library(mapdata)
+library(mapproj)
+library(scales)
+library(fields)
+library(plotrix)
+library(raster)
+library(rgdal)
+
+#Assemble raster
+outline<-as.raster('FullWorld_30.dbf')
+bioclim<-stack(raster('bio5.bil'))
+bioclim
+
+#Present values-s. par
+
+par(mar=c(0,0,0,2))
+breakpoints <- c(18,31)
+colors <- c("red")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+#Present values-s. cer
+par(mar=c(0,0,0,2))
+breakpoints <- c(25,38)
+colors <- c("red")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+#Plus 2 values-s. par
+
+par(mar=c(0,0,0,2))
+breakpoints <- c(16,29)
+colors <- c("red")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+#Plus 2 values-s. cer
+
+par(mar=c(0,0,0,2))
+breakpoints <- c(23,36)
+colors <- c("red")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+
+
+#Plus 4 values-s. par
+
+par(mar=c(0,0,0,2))
+breakpoints <- c(14,27)
+colors <- c("red")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+#Plus 4 values-s. cer
+
+par(mar=c(0,0,0,2))
+breakpoints <- c(21,34)
+colors <- c("red")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+
+
+
+
