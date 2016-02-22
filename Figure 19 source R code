@@ -1,0 +1,46 @@
+tab<-read.table("manystudies.txt", header=TRUE)
+attach(tab)
+
+#Load necessary packages
+
+library(maps)
+library(mapdata)
+library(mapproj)
+library(scales)
+library(fields)
+library(plotrix)
+library(raster)
+library(rgdal)
+
+#Assemble raster
+outline<-as.raster('FullWorld_30.dbf')
+bioclim<-stack(raster('bio5.bil'))
+bioclim
+
+#Plot map
+
+par(mar=c(0,0,0,2))
+breakpoints <- c(18,22,28,31)
+colors <- c("gray85","gray50","gray70")
+plot((bioclim$bio5/10),breaks=breakpoints,col=colors,xaxt='n',horizontal=TRUE,xlim=c(-170,180),ylim=c(-55,85),cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+map(xlim=c(-170,180),ylim=c(-65,85),add=T)
+par(xpd=TRUE)
+
+#Add legend
+
+legend(-120,-62,legend=expression(paste("Temp (",degree,"C)")),col="white",title="",bty="n")
+#Add points for each site
+
+longitude<-as.numeric(as.character(longitude))
+par(pch=21, col="black")						# POINTS FOR PRESENT
+pc<-"yellow"
+for (s in unique(site[Spar==1])) {
+	points(mean(longitude[site==s]),mean(latitude[site==s]),bg=pc)
+}
+	
+
+legend(-160,-30, "S. paradoxus",col="yellow",pch=19,title="",bty="n")
+legend(-160,-30, "S. paradoxus",col=c("black"),pch=21,title="",bty="n")
+
+
+
