@@ -1,0 +1,58 @@
+plot(circum, SparCount/sampleCount,pch=19,type="n",xlab="Trunk circumference (m)",ylab=expression(paste(italic("S. paradoxus"), "Isolation Rate (isolates per sample/Tree)")))
+
+South<-attach(oakdata[oaktype=="south",])
+
+detach(oakdata)
+attach(South)
+
+
+
+c<-seq(min(circum,na.rm=T),max(circum,na.rm=T),(max(circum,na.rm=T))/(1000-1))
+
+t<-rep(median(maxtemp,na.rm=T),length(c))
+
+p<-rep("south",length(c))
+n<-rep(1,length(c))
+
+
+yp<-predict(modelc3,list(circum=c,maxtemp=t,oaktype=p,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+
+summary(exp(subyp))
+
+lines(subc,exp(subyp),col="black")	#sOUTHERN OAKS REACH SMALLER CIRCUMFERENCES/WE FOUND SMALLER OAKS HERE
+
+detach(South)
+attach(oakdata)
+oaknorth<-attach(oakdata[oaktype=="north",])
+detach(oakdata)
+
+attach(oaknorth)
+c<-seq(min(circum,na.rm=T),max(circum,na.rm=T),(max(circum,na.rm=T))/(1000-1))
+
+t<-rep(median(maxtemp,na.rm=T),length(c))
+
+p<-rep("north",length(c))
+n<-rep(1,length(c))
+
+yp<-predict(modelc3,list(circum=c,maxtemp=t,oaktype=p,sampleCount=n))
+subyp<-subset(yp,exp(yp)<=1,)
+subc<-subset(c,exp(yp)<=1,)
+
+lines(subc,exp(subyp),col="red")	#Pedunculate oak grows up to 4m circumference
+
+
+detach(oaknorth)
+attach(oakdata)
+
+# draw on points coloured by circum predicted quantiles, and sized by circum
+
+points(circum[oaktype=="north"],SparCount[oaktype=="north"]/sampleCount[oaktype=="north"],pch=19,col="red",cex=1)
+
+points(circum[oaktype=="south"],SparCount[oaktype=="south"]/sampleCount[oaktype=="south"],pch=19,col="black",cex=1)
+
+par(xpd=TRUE)
+
+legend(2.5,1.02,title="Tree location",bg="white",bty='n',lwd=2,c("UK","Southern Europe"),lty=c(1,1),col=c("red","black"),xjust=0,cex=0.9)
+par(xpd=FALSE)
