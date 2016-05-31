@@ -17,7 +17,7 @@ a=sampledata$latitude
 
 #Produce a text output file 'output.txt'
 climdata<-file(paste("climdata.txt"), open="w")
-cat("hostName","latitude","longitude","Xannualtemp","xdiurnalrange","isothermality","tempseasonality","maxtemp","mincoldtemp","xtemprange","xtempwetquart","xtempdryquart","xtemphotquart","xtempcoldquart","xprec","precwetmonth","precdrymonth","precseasonality","precwetquart","precdryquart","prechotquart","preccoldquart","\n", file="climdata.txt",append=TRUE)
+cat("hostName","latitude","longitude","Xannualtemp","xdiurnalrange","isothermality","tempseasonality","maxtemp","mincoldtemp","xtemprange","xtempwetquart","xtempdryquart","xtemphotquart","xtempcoldquart","xprec","precwetmonth","precdrymonth","precseasonality","precwetquart","precdryquart","prechotquart","preccoldquart","\n", file="climdata.txt", sep="\t", append=TRUE)
 
 for (n in 1:166){
 c <-c(l[n],l[n]+0.01,a[n],a[n]+0.01)
